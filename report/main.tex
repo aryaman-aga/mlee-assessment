@@ -1,0 +1,556 @@
+% MLEE Course Assessment report. Compile with Tectonic (XeTeX):  tectonic main.tex
+% Every number comes from generated/results.tex (\R{key}); every listing is a
+% verbatim excerpt of ../mlee_assessment.py. Run ../build.sh to regenerate all.
+\documentclass[10pt,a4paper]{article}
+\input{meta}
+
+\usepackage[a4paper,top=12mm,bottom=13mm,left=16mm,right=16mm,
+  headheight=11pt,headsep=4mm,footskip=7mm,includeheadfoot]{geometry}
+
+% ---------------------------------------------------------------- fonts
+\usepackage{amsmath}
+\usepackage{fontspec}
+\usepackage{unicode-math}
+\setmainfont{XCharter}[Extension=.otf, UprightFont=*-Roman,
+  BoldFont=*-Bold, ItalicFont=*-Italic, BoldItalicFont=*-BoldItalic]
+\setsansfont{Lato}[Extension=.ttf, UprightFont=*-Regular,
+  BoldFont=*-Bold, ItalicFont=*-Italic, BoldItalicFont=*-BoldItalic]
+\setmonofont{Inconsolatazi4}[Extension=.otf, UprightFont=*-Regular,
+  BoldFont=*-Bold, AutoFakeSlant=0.12]
+\setmathfont{XCharter-Math.otf}
+\newfontfamily\latosemibold{Lato-Semibold.ttf}
+
+% ---------------------------------------------------------------- colour
+\usepackage{xcolor}
+\definecolor{ink}{HTML}{0B0B0B}
+\definecolor{ink2}{HTML}{52514E}
+\definecolor{muted}{HTML}{898781}
+\definecolor{rule}{HTML}{C3C2B7}
+\definecolor{grid}{HTML}{E1E0D9}
+\definecolor{accent}{HTML}{1C5CAB}
+\definecolor{blue}{HTML}{2A78D6}
+\definecolor{orange}{HTML}{EB6834}
+\definecolor{codebg}{HTML}{F7F7F5}
+\definecolor{notebg}{HTML}{EEF4FC}
+\color{ink}
+
+% ---------------------------------------------------------------- packages
+\usepackage{graphicx}
+\usepackage{booktabs,tabularx,array}
+\usepackage[skins]{tcolorbox}
+\usepackage{fvextra}
+\usepackage{fancyhdr,lastpage}
+\usepackage{enumitem}
+\usepackage[font={footnotesize,sf},labelfont={bf,color=accent},
+  labelsep=period,skip=2.5pt,justification=justified,
+  singlelinecheck=false]{caption}
+\usepackage[protrusion=true]{microtype}
+\usepackage[colorlinks,linkcolor=accent,urlcolor=accent,citecolor=accent]{hyperref}
+\hypersetup{pdftitle={MLEE Course Assessment: Four Foundational Algorithms},
+  pdfauthor={\StudentName}, pdfsubject={Decision trees, EM/GMM, PCA, ICA}}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2.6pt}
+\frenchspacing
+\thickmuskip=5mu plus 1.5mu minus 1mu
+\medmuskip=4mu plus 1mu minus 2mu
+\setlength{\abovedisplayskip}{4pt}
+\setlength{\belowdisplayskip}{4pt}
+\setlength{\abovedisplayshortskip}{2pt}
+\setlength{\belowdisplayshortskip}{2pt}
+\setlength{\tabcolsep}{4.2pt}
+\renewcommand{\arraystretch}{1.12}
+\setlength{\aboverulesep}{0.3ex}
+\setlength{\belowrulesep}{0.45ex}
+
+% ---------------------------------------------------------------- results
+\input{generated/results.tex}
+\input{generated/table1_rows.tex}
+\makeatletter
+\newcommand{\R}[1]{\ifcsname r@#1\endcsname\csname r@#1\endcsname
+  \else\PackageError{mlee}{Missing result `#1'}{Re-run mlee_assessment.py}\fi}
+\makeatother
+
+% ---------------------------------------------------------------- code
+\input{generated/pygments.tex}
+\newcommand{\codesize}{\fontsize{7.4}{8.7}\selectfont}
+\fvset{fontsize=\codesize, numbersep=3.2pt, xleftmargin=10pt,
+  listparameters=\setlength{\topsep}{0pt}\setlength{\partopsep}{0pt}}
+\renewcommand{\theFancyVerbLine}{\textcolor{muted}{\sffamily
+  \fontsize{5.4}{6}\selectfont\arabic{FancyVerbLine}}}
+\newtcolorbox{codebox}[1]{enhanced, colback=codebg, colframe=codebg,
+  boxrule=0pt, arc=1.6pt, left=1.4mm, right=1.0mm, top=1.1mm, bottom=0.9mm,
+  boxsep=0pt, borderline west={1.3pt}{0pt}{accent},
+  before skip=0pt, after skip=0pt,
+  before upper={\noindent{\sffamily\fontsize{6.2}{7}\selectfont
+    \color{muted}PYTHON\enspace\textperiodcentered\enspace
+    mlee\_assessment.py\enspace\textperiodcentered\enspace lines #1}%
+    \par\vspace{0.8pt}}}
+\newcommand{\snippetgap}{\par\vspace{2pt}{\color{rule}\hrule height 0.5pt}%
+  \vspace{2.4pt}}
+
+% ---------------------------------------------------------------- boxes
+\newtcolorbox{note}[1][]{enhanced, colback=notebg, colframe=notebg,
+  boxrule=0pt, arc=1.6pt, left=2.2mm, right=2.2mm, top=1.3mm, bottom=1.3mm,
+  boxsep=0pt, borderline west={1.3pt}{0pt}{accent}, fontupper=\small,
+  before skip=3pt, after skip=3pt, #1}
+\newcommand{\notehead}[1]{{\sffamily\bfseries\color{accent}#1}\enspace}
+
+% ---------------------------------------------------------------- headings
+\newcounter{task}
+\newcommand{\task}[3]{\par\vspace{5pt}\refstepcounter{task}\label{task:\thetask}%
+  \noindent{\sffamily\bfseries\fontsize{12.2}{14.5}\selectfont
+  {\color{accent}Task \thetask}\enspace#1}\hfill
+  {\sffamily\footnotesize\color{ink2}#2\enspace\textperiodcentered\enspace
+  \textbf{5 marks}}\par\vspace{1.5pt}
+  {\color{rule}\hrule height 0.6pt}\vspace{2.5pt}
+  \noindent{\sffamily\footnotesize\color{ink2}#3}\par\vspace{1pt}}
+\newcommand{\runin}[1]{{\sffamily\bfseries\color{accent}#1}\enspace}
+\newcommand{\closing}[1]{\par\vspace{6pt}\noindent{\sffamily\bfseries\fontsize{12.2}{14.5}\selectfont\color{accent}#1}\par\vspace{1.5pt}
+  {\color{rule}\hrule height 0.6pt}\vspace{3pt}}
+\newcommand{\colw}{0.488\textwidth}
+
+% ---------------------------------------------------------------- page style
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\sffamily\scriptsize\color{ink2}MLEE Course Assessment
+  \enspace\textperiodcentered\enspace Four foundational algorithms}
+\fancyhead[R]{\sffamily\scriptsize\color{ink2}\StudentName
+  \enspace\textperiodcentered\enspace\StudentID}
+\fancyfoot[C]{\sffamily\scriptsize\color{ink2}Page \thepage\ of
+  \pageref*{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{{\color{grid}\hrule height\headrulewidth}}
+\fancypagestyle{first}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}%
+  \fancyfoot[C]{\sffamily\scriptsize\color{ink2}Page \thepage\ of
+  \pageref*{LastPage}}}
+
+\begin{document}
+\thispagestyle{first}
+
+% ================================================================ title
+{\color{accent}\hrule height 2.2pt}\vspace{5pt}
+\noindent{\sffamily\bfseries\scriptsize\color{accent}MLEE COURSE ASSESSMENT
+  \enspace\textperiodcentered\enspace 20 MARKS \enspace\textperiodcentered
+  \enspace SUBMITTED VIA NALANDA}\hfill
+  {\sffamily\scriptsize\color{ink2}\SubmissionDate}\par\vspace{3pt}
+\noindent{\sffamily\bfseries\fontsize{19}{22}\selectfont Four Foundational
+  Algorithms in Practice}\par\vspace{2pt}
+\noindent{\sffamily\fontsize{10.5}{13}\selectfont\color{ink2}Decision trees,
+  EM for Gaussian mixtures, PCA and ICA: code, figures and diagnostics on
+  four datasets}\par\vspace{5pt}
+\noindent{\sffamily\small\textbf{\StudentName}\enspace
+  \textperiodcentered\enspace\StudentID}\hfill
+  {\sffamily\scriptsize\color{ink2}Python
+  \enspace\textperiodcentered\enspace scikit-learn, NumPy, SciPy, Matplotlib,
+  seaborn}\par\vspace{4pt}
+{\color{rule}\hrule height 0.5pt}\vspace{5pt}
+
+% ================================================================ at a glance
+\noindent{\sffamily\bfseries\small\color{accent}Results at a glance}
+{\sffamily\footnotesize\color{ink2}\enspace every required deliverable and
+where to find it}\par\vspace{2pt}
+{\sffamily\footnotesize
+\noindent\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{25mm}>{\raggedright\arraybackslash}p{61mm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Task} & \textbf{Required deliverables} & \textbf{Headline result}\\
+\midrule
+1\enspace Decision tree &
+  Metrics table \textrightarrow{} Table~\ref{tab:t1};
+  tuned tree \textrightarrow{} Fig.~\ref{fig:tree};
+  discussion \textrightarrow{} Box~1 &
+  Depth limit shrinks the train--test gap from \R{t1-default-gap} to
+  \R{t1-tuned-gap}\,pp; on wines unseen in training the tuned tree wins
+  \R{t1-rep-tunedwins-unseen} of 100 random splits.\\
+2\enspace GMM via EM &
+  $\hat\mu_k$, $\hat\Sigma_k$ \textrightarrow{} Eq.~\eqref{eq:gmm};
+  responsibility plot \textrightarrow{} Fig.~\ref{fig:gmm};
+  E/M steps \textrightarrow{} Box~2 &
+  Weights \R{t2-pi1} / \R{t2-pi2}; EM converges in \R{t2-niter} iterations
+  to $\log L=\R{t2-loglik}$; BIC also selects $K=\R{t2-bic-best}$.\\
+3\enspace PCA &
+  Cumulative variance \textrightarrow{} Fig.~\ref{fig:var};
+  minimum \#PCs \textrightarrow{} Box~3;
+  PC1--PC2 plot \textrightarrow{} Fig.~\ref{fig:pcs} &
+  \textbf{\R{t3-k85} components} retain \R{t3-cum-k85}\,\% of the variance
+  (five give only \R{t3-cum-km1}\,\%).\\
+4\enspace ICA &
+  $3{\times}1$ signal plot \textrightarrow{} Fig.~\ref{fig:ica};
+  PCA vs ICA \textrightarrow{} Box~4 (and Fig.~\ref{fig:geom}) &
+  FastICA recovers both sources with $|r|=\R{t4-r-ica-min}$; PCA stays
+  mixed ($|r|=\R{t4-r-pca-min}$, cross-talk \R{t4-leak-pca-max}).\\
+\bottomrule
+\end{tabularx}}
+
+% ================================================================ task 1
+\task{Decision Tree Classification \& Hyperparameter Tuning}{Decision trees}
+{UCI Wine Quality, red wine \cite{cortez}: \R{t1-n} wines $\times$ 11
+physicochemical features\enspace\textperiodcentered\enspace
+\texttt{sklearn.tree.DecisionTreeClassifier}}
+
+\runin{Setup.}A wine is \emph{high quality} (label 1) if
+\texttt{quality}\,$\geq$\,6: \R{t1-nhigh} wines (\R{t1-phigh}\,\%) versus
+\R{t1-nlow} low-quality wines. A stratified 80/20 split, with its seed fixed
+before any modelling, gives \R{t1-ntrain} training and \R{t1-ntest} test wines,
+and every metric treats \emph{high} as the positive class. A data audit found
+\R{t1-dups} exact duplicate rows (\R{t1-unique} unique wines): \R{t1-twin-n}
+test wines (\R{t1-twin-pct}\,\%) have an identical twin in the training set,
+so Table~\ref{tab:t1} also scores the \R{t1-unseen-n} test wines without one.
+
+\vspace{2pt}
+{\sffamily\footnotesize
+\captionof{table}{Test-set comparison of the two trees (positive class =
+high quality); best value per column in bold. Gap is training minus test
+accuracy in percentage points. \emph{Unseen} restricts the test set to wines
+with no exact duplicate in the training data.}\label{tab:t1}
+\addfontfeatures{Numbers=Monospaced}
+\noindent\begin{tabularx}{\textwidth}{@{}X*{9}{c}@{}}
+\toprule
+& \multicolumn{4}{c}{\textbf{Held-out test set} ($n=\R{t1-ntest}$)}
+& \multicolumn{4}{c}{Fit diagnostics} & Unseen ($n=\R{t1-unseen-n}$)\\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}\cmidrule(l){10-10}
+Model & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & F1
+& Train acc. & Gap (pp) & Depth & Leaves & Accuracy\\
+\midrule
+\tableonerows
+\bottomrule
+\end{tabularx}}
+
+\vspace{5pt}
+\noindent\begin{minipage}[t]{\colw}\vspace{0pt}
+\begin{codebox}{\R{snip-task1-range}}
+\input{generated/snippet_task1.tex}
+\end{codebox}
+\end{minipage}\hfill
+\begin{minipage}[t]{\colw}\vspace{0pt}
+\includegraphics[width=\linewidth]{figures/t1_validation.pdf}
+\captionof{figure}{Accuracy against \texttt{max\_depth} on the training
+split. With duplicates kept inside one fold (\texttt{StratifiedGroupKFold}),
+validation accuracy peaks at depth \R{t1-cv-best-depth} (\R{t1-cv-best}) and
+then falls to \R{t1-cv-d20} while training accuracy climbs to 1.0: the
+classic overfitting signature. Naive CV lets twins straddle folds and rewards
+memorisation.}\label{fig:val}
+
+\vspace{4pt}
+{\sffamily\footnotesize
+\captionof{table}{Mean accuracy (\textpm{} sd) over \R{t1-reps} random
+stratified 80/20 splits.}\label{tab:reps}
+\addfontfeatures{Numbers=Monospaced}
+\noindent\begin{tabularx}{\linewidth}{@{}Xcc@{}}
+\toprule
+& All test wines & Unseen wines\\
+\midrule
+(a) Default & \textbf{\R{t1-rep-default-all}} \textpm{} \R{t1-rep-default-all-sd}
+  & \R{t1-rep-default-unseen} \textpm{} \R{t1-rep-default-unseen-sd}\\
+(b) Tuned & \R{t1-rep-tuned-all} \textpm{} \R{t1-rep-tuned-all-sd}
+  & \textbf{\R{t1-rep-tuned-unseen}} \textpm{} \R{t1-rep-tuned-unseen-sd}\\
+Tuned better in & \R{t1-rep-tunedwins-all} / \R{t1-reps} splits
+  & \textbf{\R{t1-rep-tunedwins-unseen} / \R{t1-reps} splits}\\
+\bottomrule
+\end{tabularx}}
+\end{minipage}
+
+\vspace{5pt}
+\noindent\includegraphics[width=\textwidth]{figures/t1_tree.pdf}
+\captionof{figure}{The tuned tree (\texttt{max\_depth=3},
+\texttt{min\_samples\_leaf=5}): seven splits, eight leaves. Each node shows its
+rule, the number of training wines it holds, their share of high-quality
+wines and the Gini impurity; colour marks the majority class (blue low,
+orange high) and saturation its purity. Feature importances:
+\R{t1-top-features}.}\label{fig:tree}
+
+\begin{note}
+\notehead{Box 1\enspace Why restricting depth prevents overfitting.}%
+% BEGIN discussion-task1
+Grown without limits, the default tree reaches depth \R{t1-default-depth}
+with \R{t1-default-leaves} leaves and classifies every training wine
+correctly, so many leaves describe a handful of wines, including the noise in
+subjective tasting scores, and the resulting \R{t1-default-gap}-point
+train--test gap is the signature of overfitting. Capping the depth at 3
+allows at most eight axis-aligned regions, and \texttt{min\_samples\_leaf=5}
+makes every prediction an average over at least five wines, which trades a
+little bias for a large cut in variance and shrinks the gap to
+\R{t1-tuned-gap} points. Duplicate-aware cross-validation shows the same
+trade-off directly (Fig.~\ref{fig:val}): held-out accuracy peaks at depth
+\R{t1-cv-best-depth} and declines as deeper trees fit noise. The default
+tree's higher raw test accuracy comes from the \R{t1-twin-n} test wines with
+exact twins in training, which it simply memorised; on unseen wines the tuned
+tree is more accurate (\R{t1-tuned-unseen} vs \R{t1-default-unseen} here, and
+in \R{t1-rep-tunedwins-unseen} of \R{t1-reps} random splits).
+% END discussion-task1
+\end{note}
+
+% ================================================================ task 2
+\task{Gaussian Mixture Model via Expectation--Maximization}{EM \& clustering}
+{Old Faithful geyser \cite{hardle}: \R{t2-n} eruptions, duration and waiting
+time (minutes)\enspace\textperiodcentered\enspace
+\texttt{sklearn.mixture.GaussianMixture}, $K=2$}
+
+\runin{Setup.}Each eruption is $x_i=(\text{duration},\text{waiting})$. A
+two-component, full-covariance mixture is fitted by EM \cite{dempster} from
+ten $k$-means
+starts (\texttt{tol=1e-6}) and its components are ordered short then long.
+EM converged after \R{t2-niter} iterations at $\log L=\R{t2-loglik}$; BIC
+agrees that two clusters suffice (\R{t2-bics}).
+
+\vspace{3pt}
+\noindent\begin{minipage}[t]{\colw}\vspace{0pt}
+\begin{codebox}{\R{snip-task2-range}}
+\input{generated/snippet_task2.tex}
+\end{codebox}
+
+\vspace{5pt}
+\runin{Final estimates} (duration, waiting; minutes):
+\begin{equation}\label{eq:gmm}
+\begin{aligned}
+\hat\mu_1&=\R{t2-mu1}, &\quad \hat\Sigma_1&=\R{t2-S1},\\[3pt]
+\hat\mu_2&=\R{t2-mu2}, &\quad \hat\Sigma_2&=\R{t2-S2}.
+\end{aligned}
+\end{equation}
+Component 1 is the short-eruption mode ($\hat\pi_1=\R{t2-pi1}$) and
+component 2 the long mode ($\hat\pi_2=\R{t2-pi2}$), with within-cluster
+correlations $\rho_1=\R{t2-rho1}$ and $\rho_2=\R{t2-rho2}$.
+\end{minipage}\hfill
+\begin{minipage}[t]{\colw}\vspace{0pt}
+\includegraphics[width=\linewidth]{figures/t2_gmm.pdf}
+\captionof{figure}{Points coloured by their soft responsibility
+$\gamma(\text{long}\mid x)$; the faint background shows $\gamma$ over the
+plane and the grey curve is the $\gamma=0.5$ boundary. Ellipses are the
+50/90/99\,\% probability contours of each fitted Gaussian (from the
+eigen-decomposition of $\hat\Sigma_k$); $+$ marks the means. The circled eruption is the only one with
+$0.1<\gamma<0.9$.}\label{fig:gmm}
+
+\end{minipage}
+
+\vspace{4pt}
+\begin{note}
+\notehead{Box 2\enspace How the E- and M-steps update the component
+probabilities.}%
+\vspace{-3pt}
+\begin{equation*}
+\underbrace{\gamma_{ik}=\frac{\pi_k\,\mathcal{N}(x_i\mid\mu_k,\Sigma_k)}
+{\sum_{j}\pi_j\,\mathcal{N}(x_i\mid\mu_j,\Sigma_j)}}_{\text{E-step}}
+\qquad
+\underbrace{N_k=\sum_i\gamma_{ik},\quad\pi_k=\frac{N_k}{N},\quad
+\mu_k=\frac{1}{N_k}\sum_i\gamma_{ik}\,x_i,\quad
+\Sigma_k=\frac{1}{N_k}\sum_i\gamma_{ik}\,(x_i-\mu_k)(x_i-\mu_k)^{\top}}_{\text{M-step}}
+\end{equation*}
+\begin{minipage}[t]{0.655\linewidth}\vspace{0pt}
+% BEGIN discussion-task2
+In the E-step EM holds the parameters fixed and applies Bayes' rule to give
+every eruption a responsibility $\gamma_{ik}$, the posterior probability that
+component $k$ generated $x_i$. In the M-step it holds these soft assignments
+fixed and refits each component by responsibility-weighted maximum
+likelihood: the mixing weight becomes the component's share of the total
+responsibility ($\pi_k=N_k/N$), and the mean and covariance become
+$\gamma$-weighted averages. Alternating the two steps can never decrease the
+log-likelihood (Fig.~\ref{fig:em}), so the component probabilities sharpen
+iteration by iteration until the gain falls below the tolerance.
+% END discussion-task2
+\end{minipage}\hfill
+\begin{minipage}[t]{0.32\linewidth}\vspace{0pt}
+\includegraphics[width=\linewidth]{figures/t2_em.pdf}
+\captionof{figure}{EM from a random start: \R{t2-em-iters} iterations; the
+log-likelihood never decreases.}\label{fig:em}
+\end{minipage}
+\end{note}
+
+% ================================================================ task 3
+\task{Dimensionality Reduction with Principal Component Analysis}{PCA}
+{Breast Cancer Wisconsin (Diagnostic) \cite{street}: \R{t3-n} tumours
+$\times$ 30 features\enspace\textperiodcentered\enspace
+\texttt{StandardScaler} + \texttt{sklearn.decomposition.PCA}}
+
+\noindent\begin{minipage}[t]{\colw}\vspace{0pt}
+\runin{Setup.}The \R{t3-nmal} malignant and \R{t3-nben} benign tumours are
+described by 30 features on very different scales, so every feature is
+standardised before PCA. Without scaling, PC1 alone would claim
+\R{t3-raw-evr1}\,\% of the variance and would essentially be the single
+feature \emph{\R{t3-raw-top}}.
+
+\vspace{3pt}
+\begin{codebox}{\R{snip-task3-range}}
+\input{generated/snippet_task3.tex}
+\end{codebox}
+\end{minipage}\hfill
+\begin{minipage}[t]{\colw}\vspace{0pt}
+\includegraphics[width=\linewidth]{figures/t3_variance.pdf}
+\captionof{figure}{Cumulative explained-variance ratio (line) and the share
+of each component (bars) for all 30 PCs of the standardised data. The first
+point at or above the 85\,\% line is $k=\R{t3-k85}$.}\label{fig:var}
+\end{minipage}
+
+\vspace{5pt}
+\noindent\begin{minipage}[t]{\colw}\vspace{0pt}
+\includegraphics[width=\linewidth]{figures/t3_scatter.pdf}
+\captionof{figure}{Projection onto PC1 and PC2, coloured by diagnosis, with
+95\,\% class ellipses and the strongest, mutually distinct loading vectors
+(biplot arrows, scaled for visibility).}\label{fig:pcs}
+\end{minipage}\hfill
+\begin{minipage}[t]{\colw}\vspace{0pt}
+\begin{note}[fontupper=\normalsize, before skip=0pt]
+\notehead{Box 3\enspace Minimum number of components for $\geq$\,85\,\%
+variance.}\par\vspace{2pt}
+{\sffamily\bfseries\fontsize{22}{24}\selectfont\color{accent}k = \R{t3-k85}}
+\enspace{\small cumulative variance \textbf{\R{t3-cum-k85}\,\%}; five
+components reach only \R{t3-cum-km1}\,\%.}\par\vspace{2pt}
+{\small Further thresholds: 90\,\% needs \R{t3-k90}, 95\,\% needs
+\R{t3-k95} and 99\,\% needs \R{t3-k99} of the 30 components.}
+\end{note}
+
+\runin{Reading the projection.}PC1 (\R{t3-evr1}\,\%) is a size-and-shape
+axis on which all \R{t3-pc1-pos} features load positively, led by
+\R{t3-pc1-top}; malignant tumours sit on its \R{t3-mal-side} side. PC2
+(\R{t3-evr2}\,\%) contrasts the fractal-dimension features with tumour size
+(radius, area, perimeter).
+PCA never sees the diagnosis, yet the classes separate almost linearly: a
+logistic regression on PC1--PC2 alone reaches
+\R{t3-lr-acc}\,\textpm\,\R{t3-lr-sd}\,\% 10-fold CV accuracy, with PCA
+refitted inside each fold.
+\end{minipage}
+
+% ================================================================ task 4
+\clearpage
+\task{Blind Source Separation with Independent Component Analysis}{ICA}
+{Synthetic signals: 1000 samples on $t\in[0,1]$\,s, mixed by
+$A=\left[\begin{smallmatrix}1&1\\0.5&2\end{smallmatrix}\right]$
+\enspace\textperiodcentered\enspace\texttt{sklearn.decomposition.FastICA}}
+
+\runin{Setup.}The sources are $s_1=\sin(2\pi\cdot5t)$ and
+$s_2=\operatorname{sign}(\sin(2\pi\cdot3t))$, so the observations are
+$x_1=s_1+s_2$ and $x_2=0.5\,s_1+2\,s_2$. FastICA (log-cosh contrast,
+unit-variance whitening) is compared with PCA on the same mixtures. ICA
+recovers sources only up to order, sign and scale, so each output is matched
+to a source by maximum $|$correlation$|$ before plotting
+\cite{hyvarinen}.
+
+\vspace{3pt}
+\noindent\includegraphics[width=\textwidth]{figures/t4_signals.pdf}
+\captionof{figure}{The required $3{\times}1$ view: (1) the original sources,
+(2) the two observed mixtures and (3) the FastICA outputs after alignment,
+drawn over the true sources (grey). Both are recovered with
+$|r|=\R{t4-r-ica-min}$.}\label{fig:ica}
+
+\vspace{4pt}
+\noindent\begin{minipage}[t]{\colw}\vspace{0pt}
+\begin{codebox}{\R{snip-task4-range}}
+\input{generated/snippet_task4.tex}
+\end{codebox}
+\end{minipage}\hfill
+\begin{minipage}[t]{\colw}\vspace{0pt}
+\includegraphics[width=\linewidth]{figures/t4_geometry.pdf}
+\captionof{figure}{Why PCA fails. Top: the mixtures form two parallel
+segments that run along the first column of $A$ (sine, \R{t4-angle-a1}$^\circ$)
+and are offset along the second (square, \R{t4-angle-a2}$^\circ$). FastICA's
+estimated directions follow both; PCA's axes are forced to be orthogonal.
+Bottom: PCA's outputs remain blends of sine and square.}\label{fig:geom}
+\end{minipage}
+
+\begin{note}
+\notehead{Box 4\enspace PCA versus ICA on these mixtures.}%
+% BEGIN discussion-task4
+PCA relies only on second-order statistics: it finds orthogonal directions
+of maximum variance, so its outputs are uncorrelated but still mixed,
+because the true mixing directions (\R{t4-angle-a1}$^\circ$ and
+\R{t4-angle-a2}$^\circ$, only \R{t4-angle-between}$^\circ$ apart) are not
+orthogonal and PC1 (\R{t4-angle-pc1}$^\circ$, \R{t4-pc1-var}\,\% of the
+variance) simply falls between them (Fig.~\ref{fig:geom}). Once the data are
+whitened, any further rotation leaves the covariance unchanged, so variance
+alone cannot identify the unmixing rotation, and for Gaussian sources no
+method could, since a whitened Gaussian looks the same in every direction.
+These sources are strongly non-Gaussian (excess kurtosis
+$\R{t4-kurt-sine}$ for the sine and $\R{t4-kurt-square}$ for the square
+wave), and FastICA exploits this by choosing the rotation that maximises
+non-Gaussianity, measured by a log-cosh approximation to negentropy. As a
+result FastICA recovers both sources with $|r|=\R{t4-r-ica-min}$ (Amari
+index \R{t4-amari-ica}), whereas PCA's best match is only
+$|r|=\R{t4-r-pca-min}$ with \R{t4-leak-pca-max} cross-talk from the other
+source (Amari index \R{t4-amari-pca}).
+% END discussion-task4
+\end{note}
+
+% ================================================================ end matter
+\closing{Synthesis: what the four experiments show}
+\begin{itemize}[leftmargin=10pt, itemsep=2pt, topsep=1pt, parsep=0pt,
+  label={\color{accent}\textbullet}]
+\item \textbf{Judge capacity on honest validation.} The unconstrained tree's
+  \R{t1-default-gap}-point train--test gap and the duplicate-aware CV curve
+  expose overfitting that a naive split partly hides, because
+  \R{t1-twin-pct}\,\% of the test wines had exact twins in training.
+\item \textbf{EM turns one hard problem into two easy ones.} The E-step
+  computes posteriors in closed form, the M-step solves weighted maximum
+  likelihood exactly, and the log-likelihood rises monotonically to the
+  optimum; BIC confirms $K=2$ for Old Faithful.
+\item \textbf{PCA compresses but does not explain.} Six of thirty
+  standardised components keep \R{t3-cum-k85}\,\% of the variance and separate
+  the diagnoses well, yet the axes are chosen by variance alone, which is
+  exactly the limitation Task~4 exposes.
+\item \textbf{ICA needs non-Gaussian sources.} Higher-order statistics fix the
+  rotation that second-order methods leave undetermined, lifting the match
+  from $|r|=\R{t4-r-pca-min}$ (PCA) to $|r|=\R{t4-r-ica-min}$ (FastICA).
+\end{itemize}
+
+\closing{Verification and reproducibility}
+Every run of \texttt{mlee\_assessment.py} recomputes all numbers, tables,
+figures and listings in this report, and stops if any check below fails.
+\par\vspace{3pt}
+{\sffamily\footnotesize
+\noindent\begin{tabularx}{\textwidth}{@{}>{\bfseries}p{31mm}
+  >{\raggedright\arraybackslash}X@{}}
+\toprule
+Check & Outcome on this run\\
+\midrule
+Data integrity & SHA-256 of both downloads verified; shapes
+  \R{t1-n}\,$\times$\,11, \R{t2-n}\,$\times$\,2, \R{t3-n}\,$\times$\,30 and
+  1000\,$\times$\,2.\\
+Labels & \R{t1-nhigh} high- and \R{t1-nlow} low-quality wines; \R{t3-nmal}
+  malignant and \R{t3-nben} benign tumours.\\
+Duplicate audit & \R{t1-dups} duplicated wine rows; \R{t1-twin-n} of the
+  \R{t1-ntest} test wines have a twin in the training set.\\
+Task 1 metrics & Table~\ref{tab:t1} recomputed independently and matched to
+  the listing's values; tree-plot node order checked against sample counts
+  before relabelling.\\
+Task 2 EM & Converged; the random-start trace is monotone and reaches the same
+  optimum as the $k$-means start (per-sample $|\Delta\log L|<10^{-6}$).\\
+Task 3 PCA & $k=\R{t3-k85}$ from the cumulative curve equals
+  \texttt{PCA(n\_components=0.85)}; all \R{t3-pc1-pos} PC1 loadings are
+  positive.\\
+Task 4 ICA & $|r|>0.999$ for both FastICA outputs and $<0.99$ for PCA.\\
+Listings & ASCII only, at most 56 characters per line, copied verbatim with
+  the script's own line numbers.\\
+\bottomrule
+\end{tabularx}}
+
+\vspace{4pt}
+{\sffamily\footnotesize\noindent\textbf{\color{accent}Environment.}\enspace
+\R{versions}; seed 42 for every split, tree, mixture and ICA run.
+Data SHA-256: wine \texttt{\R{sha-wine}\dots}, geyser
+\texttt{\R{sha-geyser}\dots}; the breast-cancer data ship with scikit-learn
+\cite{sklearn}. One command, \texttt{./build.sh}, rebuilds this PDF.\par}
+
+\vspace{6pt}
+\noindent{\sffamily\bfseries\footnotesize\color{accent}References}\par
+\vspace{-2pt}
+{\renewcommand{\section}[2]{}%
+\footnotesize
+\begin{thebibliography}{9}
+\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}
+\bibitem{cortez} P.~Cortez, A.~Cerdeira, F.~Almeida, T.~Matos, J.~Reis.
+  Modeling wine preferences by data mining from physicochemical properties.
+  \emph{Decision Support Systems} 47(4):547--553, 2009.
+\bibitem{hardle} W.~Härdle. \emph{Smoothing Techniques with Implementation
+  in S}. Springer, 1991 (the 272-eruption Old Faithful data).
+\bibitem{street} W.\,N.~Street, W.\,H.~Wolberg, O.\,L.~Mangasarian. Nuclear
+  feature extraction for breast tumor diagnosis. \emph{Proc.\ SPIE} 1905,
+  861--870, 1993.
+\bibitem{dempster} A.\,P.~Dempster, N.\,M.~Laird, D.\,B.~Rubin. Maximum
+  likelihood from incomplete data via the EM algorithm. \emph{J.\ R.\ Stat.\
+  Soc.\ B} 39(1):1--38, 1977.
+\bibitem{hyvarinen} A.~Hyvärinen, E.~Oja. Independent component analysis:
+  algorithms and applications. \emph{Neural Networks} 13(4--5):411--430,
+  2000.
+\bibitem{sklearn} F.~Pedregosa et al. Scikit-learn: machine learning in
+  Python. \emph{JMLR} 12:2825--2830, 2011.
+\end{thebibliography}}
+
+\end{document}

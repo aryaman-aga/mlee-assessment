@@ -1,0 +1,114 @@
+name: Windows installer
+
+# Builds MLEE_Assessment_Setup.exe on a real Windows machine, then installs it,
+# exercises every entry point the staff will use, and uninstalls it again.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build, install and test on Windows
+    runs-on: windows-2025
+    timeout-minutes: 60
+    env:
+      PYTHONUTF8: "1"
+      INSTALL_DIR: C:\MLEE Test
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Build the installer (stage runtime, fill TeX cache, run NSIS)
+        shell: pwsh
+        run: ./windows/build_windows.ps1
+
+      - name: Install silently (per user, into a path with a space)
+        shell: pwsh
+        run: |
+          $p = Start-Process dist\MLEE_Assessment_Setup.exe -ArgumentList '/S', "/D=$env:INSTALL_DIR" -Wait -PassThru
+          if ($p.ExitCode) { throw "installer exit code $($p.ExitCode)" }
+          foreach ($f in 'python\python.exe', 'tectonic\tectonic.exe', 'texcache', 'app\build.py',
+                         'MLEE Assessment.cmd', 'Uninstall.exe', 'Staff Guide.html') {
+            if (-not (Test-Path (Join-Path $env:INSTALL_DIR $f))) { throw "missing after install: $f" }
+          }
+          Get-ChildItem "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\MLEE Assessment" | Format-Table Name
+          Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\MLEE-Assessment' |
+            Format-List DisplayName, DisplayVersion, EstimatedSize, InstallLocation
+
+      - name: DLL dependencies are all bundled (no VC++ redistributable needed)
+        shell: pwsh
+        run: |
+          python -m pip install --quiet pefile
+          python windows/check_dlls.py "$env:INSTALL_DIR\python" "$env:INSTALL_DIR\tectonic"
+
+      - name: Bundled Python imports every library
+        shell: pwsh
+        run: |
+          & "$env:INSTALL_DIR\python\python.exe" -s -c "import sys, numpy, scipy, sklearn, matplotlib, seaborn, pandas, pymupdf, pygments; print(sys.version); print('numpy', numpy.__version__, 'scipy', scipy.__version__, 'sklearn', sklearn.__version__, 'matplotlib', matplotlib.__version__, 'pandas', pandas.__version__)"
+          if ($LASTEXITCODE) { throw "import failed" }
+
+      - name: Launcher - Run analysis
+        shell: cmd
+        env:
+          MLEE_STRICT_COMPARE: "1"
+        run: call "%INSTALL_DIR%\Run analysis.cmd" nopause
+
+      - name: Launcher - Build report PDF (offline TeX only, strict comparison)
+        shell: cmd
+        env:
+          MLEE_REQUIRE_OFFLINE: "1"
+          MLEE_STRICT_COMPARE: "1"
+        run: call "%INSTALL_DIR%\Build report PDF.cmd" nopause
+
+      - name: Test console - set name and ID, rebuild the PDF
+        shell: pwsh
+        env:
+          MLEE_REQUIRE_OFFLINE: "1"
+        run: |
+          "4`nCI Tester`nCI-0001`n3`n7`n0`n" | & "$env:INSTALL_DIR\python\python.exe" -s -X utf8 "$env:INSTALL_DIR\app\mlee_menu.py"
+          if ($LASTEXITCODE) { throw "menu failed" }
+          & "$env:INSTALL_DIR\python\python.exe" -s -c "import pymupdf, sys; t = ''.join(p.get_text() for p in pymupdf.open(sys.argv[1])); assert 'CI Tester' in t and 'CI-0001' in t, 'name/ID missing from PDF'; print('name and ID found in the rebuilt PDF')" "$env:INSTALL_DIR\app\output\MLEE_Assessment_Report.pdf"
+          if ($LASTEXITCODE) { throw "PDF check failed" }
+
+      - name: Collect test outputs
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force test-output | Out-Null
+          Copy-Item "$env:INSTALL_DIR\app\output\*.pdf", "$env:INSTALL_DIR\app\results.json", "$env:INSTALL_DIR\app\build\*.log" test-output -ErrorAction SilentlyContinue
+          Get-ChildItem test-output | Format-Table Name, Length
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v7
+        with:
+          name: MLEE_Assessment_Setup
+          path: |
+            dist/MLEE_Assessment_Setup.exe
+            dist/MLEE_Assessment_Setup.exe.sha256
+          compression-level: 0
+          retention-days: 30
+
+      - name: Upload test outputs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-test-output
+          path: test-output/
+          retention-days: 30
+
+      - name: Uninstall silently and confirm nothing is left
+        shell: pwsh
+        run: |
+          Start-Process "$env:INSTALL_DIR\Uninstall.exe" -ArgumentList '/S' -Wait
+          for ($i = 0; $i -lt 60 -and (Test-Path "$env:INSTALL_DIR\python"); $i++) { Start-Sleep 2 }
+          if (Test-Path "$env:INSTALL_DIR\python") { throw "uninstall left the runtime behind" }
+          if (Test-Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\MLEE-Assessment') { throw "uninstall left the Apps entry" }
+          if (Test-Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\MLEE Assessment") { throw "uninstall left the Start-menu folder" }
+          Write-Host "uninstall clean"

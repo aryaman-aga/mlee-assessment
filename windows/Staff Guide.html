@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MLEE Assessment – Staff Guide</title>
+<style>
+  :root { --ink:#0b0b0b; --ink2:#52514e; --muted:#898781; --rule:#e1e0d9;
+          --accent:#1c5cab; --tint:#eef4fc; --code:#f4f4f1; --ok:#0b7a3a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fff; color: var(--ink);
+         font: 15px/1.55 "Segoe UI", system-ui, -apple-system, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 32px 20px 56px; }
+  header { border-top: 5px solid var(--accent); padding-top: 18px; margin-bottom: 8px; }
+  .kicker { color: var(--accent); font-weight: 700; font-size: 12px; letter-spacing: .08em;
+            text-transform: uppercase; }
+  h1 { font-size: 30px; line-height: 1.2; margin: 4px 0 6px; }
+  .lede { color: var(--ink2); font-size: 16px; margin: 0; }
+  h2 { font-size: 19px; color: var(--accent); margin: 34px 0 8px; padding-bottom: 5px;
+       border-bottom: 1px solid var(--rule); }
+  ol, ul { padding-left: 22px; } li { margin: 4px 0; }
+  code, kbd { font-family: Consolas, "Cascadia Mono", monospace; font-size: 13.5px;
+              background: var(--code); border-radius: 4px; padding: 1px 5px; }
+  pre { background: var(--code); border-radius: 6px; padding: 10px 12px; overflow-x: auto;
+        font: 13.5px/1.45 Consolas, "Cascadia Mono", monospace; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 14px; }
+  th, td { text-align: left; vertical-align: top; padding: 7px 10px 7px 0;
+           border-bottom: 1px solid var(--rule); }
+  th { font-size: 12.5px; color: var(--ink2); font-weight: 600; }
+  td:first-child { white-space: nowrap; font-weight: 600; }
+  .note { background: var(--tint); border-left: 4px solid var(--accent); border-radius: 4px;
+          padding: 10px 14px; margin: 12px 0; }
+  .ok { color: var(--ok); font-weight: 600; }
+  .muted { color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="kicker">MLEE Assessment · Windows toolkit</div>
+  <h1>Staff guide: install, run and test</h1>
+  <p class="lede">One installer sets up everything needed to run the four-task assessment
+  (decision trees, Gaussian mixtures via EM, PCA and ICA) and to rebuild its PDF report.
+  You don't need Python, administrator rights or an internet connection.</p>
+</header>
+
+<h2>1&nbsp; What gets installed</h2>
+<table>
+  <tr><th>Component</th><th>Details</th></tr>
+  <tr><td>Python 3.13</td><td>A private copy with NumPy, SciPy, scikit-learn, Matplotlib, seaborn,
+      pandas and PyMuPDF. It is used only by this toolkit and leaves any other Python on the PC untouched.</td></tr>
+  <tr><td>The assessment</td><td>The analysis script, the report source, and the Wine Quality and
+      Old Faithful datasets. The breast-cancer data ships inside scikit-learn.</td></tr>
+  <tr><td>PDF engine</td><td>Tectonic (a TeX engine) with an offline cache of every TeX file the report needs.</td></tr>
+  <tr><td>Shortcuts</td><td>A <em>MLEE Assessment</em> Start-menu folder, a desktop icon, and an
+      entry in <em>Settings → Apps</em> for uninstalling.</td></tr>
+</table>
+<p class="muted">Default location: <code>%LOCALAPPDATA%\Programs\MLEE Assessment</code> (per user).
+The installed size is roughly 0.6 GB.</p>
+
+<h2>2&nbsp; Install</h2>
+<ol>
+  <li>Copy <code>MLEE_Assessment_Setup.exe</code> to the laptop and double-click it.</li>
+  <li>If Windows shows <em>“Windows protected your PC”</em>, click <strong>More info → Run anyway</strong>.
+      The installer is not code-signed, so SmartScreen warns about any unsigned download.</li>
+  <li>Keep the suggested folder, click <strong>Install</strong>, then <strong>Finish</strong>.
+      You can open the test console straight from the last page.</li>
+</ol>
+<div class="note"><strong>Optional integrity check.</strong> In a command prompt, run the line below
+and compare the result with the value in <code>MLEE_Assessment_Setup.exe.sha256</code>:
+<pre>certutil -hashfile MLEE_Assessment_Setup.exe SHA256</pre></div>
+
+<h2>3&nbsp; Run</h2>
+<p>Open <strong>Start → MLEE Assessment</strong>:</p>
+<table>
+  <tr><th>Shortcut</th><th>What it does</th></tr>
+  <tr><td>MLEE Assessment (test console)</td><td>A numbered menu: run the analysis, build the PDF,
+      set the student name and ID, open outputs and show the headline results.
+      The desktop icon opens this too.</td></tr>
+  <tr><td>Run analysis</td><td>Runs all four tasks (under a minute), compares every number with
+      the reference run, then opens the figures folder.</td></tr>
+  <tr><td>Build report PDF</td><td>Runs the analysis, typesets the 5-page report and runs 13 automatic
+      checks (one to two minutes), then opens the PDF.</td></tr>
+  <tr><td>MLEE command prompt</td><td>A command window with the bundled Python on the path, for running
+      scripts by hand, e.g. <code>python mlee_assessment.py</code>.</td></tr>
+</table>
+<p>The first run takes longer while Windows and Python warm their caches.</p>
+
+<h2>4&nbsp; What a successful test looks like</h2>
+<ul>
+  <li><span class="ok">[mlee] results match the reference run: 199 values …</span> means the numbers
+      are identical to the run the report was produced from.</li>
+  <li><span class="ok">QA passed: 5 pages</span> means the PDF met the 6-page limit and passed the
+      font, numeric-consistency and sentence-count checks.</li>
+</ul>
+<table>
+  <tr><th>Output</th><th>Location (inside the install folder)</th></tr>
+  <tr><td>Report PDF</td><td><code>app\output\MLEE_Assessment_Report.pdf</code></td></tr>
+  <tr><td>Figures (8)</td><td><code>app\report\figures\</code></td></tr>
+  <tr><td>All numbers</td><td><code>app\results.json</code></td></tr>
+  <tr><td>Logs</td><td><code>app\build\analysis.log</code> and <code>app\build\main.log</code></td></tr>
+</table>
+
+<h2>5&nbsp; Common tasks</h2>
+<ul>
+  <li><strong>Put a student's name and ID on the report:</strong> in the test console, choose
+      <kbd>4</kbd>, type both, then choose <kbd>3</kbd> to rebuild the PDF.</li>
+  <li><strong>Experiment with the code:</strong> edit <code>app\mlee_assessment.py</code>
+      (for example the <code>SEED</code> value) and run it again. The reference comparison will
+      then list the numbers that changed; this is expected.</li>
+  <li><strong>Get back to the original:</strong> run the installer again. It replaces the program
+      files but keeps the name and ID you entered.</li>
+</ul>
+
+<h2>6&nbsp; Troubleshooting</h2>
+<table>
+  <tr><th>Symptom</th><th>Fix</th></tr>
+  <tr><td>SmartScreen blocks the installer</td><td>Click <em>More info → Run anyway</em>. If company
+      policy blocks unsigned programs, ask IT to allow the file (its SHA-256 is in the .sha256 file).</td></tr>
+  <tr><td>Antivirus quarantines a file</td><td>Restore it and allow the install folder, then run the
+      installer again.</td></tr>
+  <tr><td>“Analysis failed”</td><td>The last lines are printed on screen; the full log is in
+      <code>app\build\analysis.log</code>.</td></tr>
+  <tr><td>“PDF build failed”</td><td>See <code>app\build\main.log</code>. The PDF normally builds offline.
+      If a TeX file is missing from the cache, the toolkit downloads it, which needs internet once.</td></tr>
+  <tr><td>Window closes immediately</td><td>Use <em>MLEE command prompt</em> and run
+      <code>python build.py</code> to keep the messages on screen.</td></tr>
+</table>
+
+<h2>7&nbsp; Uninstall</h2>
+<p><strong>Settings → Apps → MLEE Assessment → Uninstall</strong>, or <em>Start → MLEE Assessment →
+Uninstall</em>. This removes the program folder, the shortcuts and the Apps entry.</p>
+
+<p class="muted">Third-party components and their licences are listed in
+<code>THIRD_PARTY_NOTICES.txt</code> in the install folder.</p>
+</main>
+</body>
+</html>

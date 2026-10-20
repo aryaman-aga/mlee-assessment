@@ -1,0 +1,11 @@
+# Normalise text to LF in the repo; Windows CI checks out with these rules.
+* text=auto eol=lf
+# Byte-exact files: their SHA-256 is verified at run time.
+*.csv -text
+data/SHA256SUMS -text
+*.ttf binary
+*.ico binary
+*.pdf binary
+# cmd.exe needs CRLF line endings in batch files.
+*.cmd text eol=crlf
+*.ps1 text eol=crlf

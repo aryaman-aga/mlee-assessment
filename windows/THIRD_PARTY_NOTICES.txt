@@ -1,0 +1,49 @@
+MLEE Assessment - third-party components
+========================================
+
+This toolkit bundles the open-source components below, unmodified. Each one
+remains under its own licence. Full licence texts ship with each component,
+in the locations given.
+
+Runtime
+-------
+Python 3.13 (python.org embeddable distribution)
+    PSF License Agreement - python\LICENSE.txt
+Microsoft Visual C++ runtime DLLs (msvcp140*.dll, vcruntime140*.dll, concrt140.dll)
+    Microsoft Visual Studio redistributable code, deployed app-locally
+    as permitted by the Visual Studio licence terms.
+Tectonic 0.17 TeX engine
+    MIT License - https://github.com/tectonic-typesetting/tectonic
+TeX files in texcache\ (LaTeX, XCharter, Lato, Inconsolata, tcolorbox, ...)
+    Taken from the TeX Live distribution under their own free licences
+    (mostly LPPL, SIL OFL and GPL); notices are inside the files.
+
+Python packages (licence text in python\Lib\site-packages\<package>.dist-info\)
+---------------------------------------------------------------------------
+NumPy, SciPy, scikit-learn, pandas, seaborn, joblib, threadpoolctl,
+contourpy, kiwisolver, cycler, cloudpickle ........... BSD-3-Clause
+Matplotlib ............................................ Matplotlib License (PSF-based)
+Pillow ................................................ MIT-CMU (HPND)
+fonttools, pyparsing, six, narwhals ................... MIT
+Pygments .............................................. BSD-2-Clause
+python-dateutil ....................................... Apache-2.0 / BSD-3-Clause
+packaging, tzdata ..................................... Apache-2.0 (packaging also BSD-2)
+pip ................................................... MIT
+PyMuPDF ............................................... GNU AGPL v3.0
+    (or a commercial licence from Artifex). Used only by qa_check.py to
+    inspect the generated PDF. Unmodified; source code:
+    https://github.com/pymupdf/PyMuPDF
+
+Fonts
+-----
+Lato 2.015 (app\fonts\) ............................... SIL Open Font License 1.1
+    app\fonts\OFL.txt
+
+Data
+----
+Wine Quality (red), UCI Machine Learning Repository ... CC BY 4.0
+    P. Cortez et al., Decision Support Systems 47(4):547-553, 2009.
+Old Faithful geyser, seaborn-data copy of R's faithful ... public dataset
+    W. Härdle, Smoothing Techniques with Implementation in S, Springer 1991.
+Breast Cancer Wisconsin (Diagnostic), via scikit-learn ... CC BY 4.0
+    W. N. Street, W. H. Wolberg, O. L. Mangasarian, Proc. SPIE 1905, 1993.
