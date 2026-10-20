@@ -5,7 +5,7 @@
     python build.py --analysis-only  run the four tasks only (figures, results)
     python build.py --pdf-only       recompile the PDF from the last analysis
     python build.py --compare        also compare results.json with the
-                                     reference run in reference/results.json
+                                     reference run for this platform
 
 In the Windows installation this file lives in <install>\\app, next to the
 bundled Python (<install>\\python), Tectonic (<install>\\tectonic) and an
@@ -124,13 +124,8 @@ def run_qa(out: Path) -> None:
         fail("one or more QA checks failed (listed above)")
 
 
-def compare_reference() -> None:
-    ref_path = APP / "reference" / "results.json"
-    if not ref_path.is_file():
-        say("no reference/results.json; comparison skipped")
-        return
-    ref = json.loads(ref_path.read_text(encoding="utf-8"))
-    new = json.loads((APP / "results.json").read_text(encoding="utf-8"))
+def diff_results(ref: dict, new: dict) -> tuple[list, int]:
+    """Values that differ beyond REL_TOL, walking nested lists and dicts."""
     diffs, count = [], 0
 
     def walk(a, b, key):
@@ -151,11 +146,39 @@ def compare_reference() -> None:
                 diffs.append((key, a, b))
 
     walk(ref, new, "")
-    if not diffs:
-        say(f"results match the reference run: {count} values within "
-            f"a relative tolerance of {REL_TOL:g}")
+    return diffs, count
+
+
+def load(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def compare_reference() -> None:
+    """Compare results.json with the reference run for this platform.
+
+    Fully grown decision trees break exact ties between candidate splits
+    differently on different CPU architectures, so the Windows (x64) build
+    has its own reference; it differs from the macOS submission run only in
+    the unconstrained-tree experiments of Task 1.
+    """
+    mac = APP / "reference" / "results.json"
+    win = APP / "reference" / "results-windows.json"
+    ref = win if sys.platform == "win32" and win.is_file() else mac
+    if not ref.is_file():
+        say("no reference results found; comparison skipped")
         return
-    say(f"{len(diffs)} of {count} values differ from the reference run:")
+    label = "Windows" if ref == win else "macOS"
+    new = load(APP / "results.json")
+    diffs, count = diff_results(load(ref), new)
+    if not diffs:
+        say(f"results match the {label} reference run: {count} values "
+            f"within a relative tolerance of {REL_TOL:g}")
+        if ref == win and mac.is_file():
+            n = len(diff_results(load(mac), new)[0])
+            say(f"(vs the macOS submission run: {n} values differ, all from "
+                f"the unconstrained-tree experiments; see README)")
+        return
+    say(f"{len(diffs)} of {count} values differ from the {label} reference run:")
     for key, a, b in diffs[:15]:
         print(f"         {key}: reference {a!r}, this run {b!r}")
     if os.environ.get("MLEE_STRICT_COMPARE") == "1":

@@ -56,7 +56,7 @@
       entry in <em>Settings → Apps</em> for uninstalling.</td></tr>
 </table>
 <p class="muted">Default location: <code>%LOCALAPPDATA%\Programs\MLEE Assessment</code> (per user).
-The installed size is roughly 0.6 GB.</p>
+The installer is about 95 MB and the installed size is about 440 MB.</p>
 
 <h2>2&nbsp; Install</h2>
 <ol>
@@ -88,8 +88,10 @@ and compare the result with the value in <code>MLEE_Assessment_Setup.exe.sha256<
 
 <h2>4&nbsp; What a successful test looks like</h2>
 <ul>
-  <li><span class="ok">[mlee] results match the reference run: 199 values …</span> means the numbers
-      are identical to the run the report was produced from.</li>
+  <li><span class="ok">[mlee] results match the Windows reference run: 199 values …</span> means every
+      number is identical to the validated Windows build. The extra line
+      <em>“vs the macOS submission run: 8 values differ”</em> is expected: fully grown decision trees break
+      exact ties slightly differently on Windows than on the Mac the report was written on.</li>
   <li><span class="ok">QA passed: 5 pages</span> means the PDF met the 6-page limit and passed the
       font, numeric-consistency and sentence-count checks.</li>
 </ul>

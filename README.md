@@ -14,7 +14,8 @@ Everything in it is generated from this folder.
 | `fonts/` | Lato TTFs (SIL OFL), taken from the Tectonic TeX bundle so the figures use the report's sans-serif font. |
 | `build.py` | Cross-platform build driver used by `build.sh` and the Windows launchers. |
 | `mlee_menu.py` | Console menu for staff testing (the Windows start-menu entry). |
-| `reference/results.json` | Numbers from the reference macOS run; `build.py --compare` checks a new run against them. |
+| `reference/results.json` | Numbers from the macOS submission run. `build.py --compare` checks a new run against the reference for its platform. |
+| `reference/results-windows.json` | The same numbers from the Windows x64 build (see *Cross-platform results*). |
 | `windows/` | Windows installer: NSIS script, staging script, launchers, DLL check, staff guide. |
 
 ## Rebuild
@@ -64,3 +65,11 @@ powershell -ExecutionPolicy Bypass -File windows\build_windows.ps1
 ```
 
 How to install and use the toolkit on Windows is covered in `windows/Staff Guide.html`.
+
+## Cross-platform results
+
+The Windows x64 build reproduces the macOS submission run to within 1e-6, except for 8 of the 199 recorded values. All 8 come from Task 1's *unconstrained*-tree experiments: the naive CV accuracy at depth 20, and the 100 repeated splits.
+
+A fully grown tree reaches nodes where several candidate splits are exactly tied. Apple-silicon and x64 builds of scikit-learn round those sums differently, so the ties break differently. The depth-3 tree, Table 1 and Tasks 2-4 are unaffected.
+
+Only one printed number changes: in Table 2, "Tuned better in 4 / 100 splits" (all test wines) becomes 3 / 100 on Windows. Results are deterministic within each platform, which is why the Windows reference is kept separately.
