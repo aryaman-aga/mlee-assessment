@@ -74,7 +74,7 @@ jobs:
         run: |
           "4`nCI Tester`nCI-0001`n3`n7`n0`n" | & "$env:INSTALL_DIR\python\python.exe" -s -X utf8 "$env:INSTALL_DIR\app\mlee_menu.py"
           if ($LASTEXITCODE) { throw "menu failed" }
-          & "$env:INSTALL_DIR\python\python.exe" -s -c "import pymupdf, sys; t = ''.join(p.get_text() for p in pymupdf.open(sys.argv[1])); assert 'CI Tester' in t and 'CI-0001' in t, 'name/ID missing from PDF'; print('name and ID found in the rebuilt PDF')" "$env:INSTALL_DIR\app\output\MLEE_Assessment_Report.pdf"
+          & "$env:INSTALL_DIR\python\python.exe" -s -c "import pymupdf, sys; t = ''.join(p.get_text() for p in pymupdf.open(sys.argv[1])).replace(chr(0x2010), '-'); assert 'CI Tester' in t and 'CI-0001' in t, 'name/ID missing from PDF'; print('name and ID found in the rebuilt PDF')" "$env:INSTALL_DIR\app\output\MLEE_Assessment_Report.pdf"
           if ($LASTEXITCODE) { throw "PDF check failed" }
 
       - name: Collect test outputs

@@ -88,7 +88,7 @@ Section "MLEE Assessment" SecMain
   RMDir /r "$INSTDIR\python"
   RMDir /r "$INSTDIR\tectonic"
   RMDir /r "$INSTDIR\texcache"
-  File /r /x "meta.tex" "${STAGE}\*.*"
+  File /r /x "meta.tex" "${STAGE}\*"
   ; Keep a student name/ID already entered by the user when upgrading.
   SetOutPath "$INSTDIR\app\report"
   SetOverwrite off
